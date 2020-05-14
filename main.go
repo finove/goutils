@@ -9,7 +9,7 @@ import (
 	"github.com/finove/goutils/vconfig"
 )
 
-var goutilsVersion = "1.0.1"
+var goutilsVersion = "1.0.2"
 
 var testFor string
 
