@@ -1,11 +1,13 @@
+// +build !windows,!plan9
+
 package logger
 
 import (
 	"encoding/json"
+	"log/syslog"
 	"time"
 
 	"github.com/astaxie/beego/logs"
-	"log/syslog"
 )
 
 // adapter name

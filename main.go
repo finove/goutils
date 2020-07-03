@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/finove/goutils/errormessage"
 	"github.com/finove/goutils/logger"
 	"github.com/finove/goutils/sms"
 	"github.com/finove/goutils/vconfig"
 )
 
-var goutilsVersion = "1.0.2"
+var goutilsVersion = "1.0.3"
 
 var testFor string
 
