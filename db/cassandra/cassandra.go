@@ -35,3 +35,26 @@ func (a *Agent) Query(sql string, values ...interface{}) *gocql.Query {
 	}
 	return a.session.Query(sql, values...)
 }
+
+// Session 返回连接Session
+func (a *Agent) Session() *gocql.Session {
+	return a.session
+}
+
+// Batch 批量操作
+func (a *Agent) Batch(typ gocql.BatchType) *gocql.Batch {
+	return a.session.NewBatch(typ)
+}
+
+// Tables 查询所有表格及其字段名
+func (a *Agent) Tables() (tbls map[string][]string) {
+	ks, err := a.session.KeyspaceMetadata(a.DefaultKeyspace)
+	if err != nil {
+		return
+	}
+	tbls = make(map[string][]string)
+	for _, tbl := range ks.Tables {
+		tbls[tbl.Name] = tbl.OrderedColumns
+	}
+	return
+}
