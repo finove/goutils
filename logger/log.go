@@ -3,10 +3,12 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/astaxie/beego/logs"
 )
 
 type logSetupConfig struct {
+	MaxDays  int    `json:"maxdays"`
 	ToSyslog bool   `json:"tosyslog,omitempty"`
 	AppName  string `json:"appname,omitempty"`
 	FileName string `json:"filename,omitempty"`
@@ -20,7 +22,10 @@ func Setup(console bool, level string, logFileName string, jsonConfig ...string)
 	}
 	if logFileName != "" {
 		var beegoLogConfig string
-		beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"rotate":true,"level":%d}`, logFileName, 1<<29, logs.LevelDebug)
+		if cfg.MaxDays <= 0 {
+			cfg.MaxDays = 7
+		}
+		beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, cfg.MaxDays, logs.LevelDebug)
 		logs.SetLogger("multifile", beegoLogConfig)
 	}
 	if cfg.ToSyslog == true && cfg.AppName != "" {
