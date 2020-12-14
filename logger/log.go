@@ -72,6 +72,19 @@ func Debug(f interface{}, v ...interface{}) {
 	logs.Debug(f, v...)
 }
 
+// NewLogFile init another log file
+func NewLogFile(logFileName string, maxDays int) (newLog *logs.BeeLogger) {
+	var beegoLogConfig string
+	newLog = logs.NewLogger()
+	beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, maxDays, logs.LevelDebug)
+	newLog.SetLogger("multifile", beegoLogConfig)
+	newLog.DelLogger("console")
+	newLog.EnableFuncCallDepth(false)
+	newLog.SetLogFuncCallDepth(4)
+	newLog.SetLevel(getLevel("info"))
+	return
+}
+
 // getLevel fatal,error,warn,info,debug
 func getLevel(level string) (l int) {
 	switch level {
