@@ -5,6 +5,7 @@
 *.so
 *.dylib
 goutils
+*.yaml
 
 # Test binary, built with `go test -c`
 *.test
