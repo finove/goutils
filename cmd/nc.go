@@ -17,6 +17,7 @@ var (
 	ncUseUDP     bool
 	ncListenPort uint16
 	ncRemote     string
+	ncDelay      time.Duration
 )
 
 var ncCmd = &cobra.Command{
@@ -102,6 +103,7 @@ func processInput(conn net.Conn) {
 		n, err = os.Stdin.Read(buff)
 		if err != nil {
 			if errors.Is(err, io.EOF) {
+				time.Sleep(ncDelay)
 				conn.Close()
 				break
 			}
@@ -132,4 +134,5 @@ func init() {
 	rootCmd.AddCommand(ncCmd)
 	ncCmd.Flags().BoolVarP(&ncUseUDP, "udp", "u", false, "use udp")
 	ncCmd.Flags().Uint16VarP(&ncListenPort, "listen", "l", 0, "listen port")
+	ncCmd.Flags().DurationVarP(&ncDelay, "delay", "d", 100*time.Millisecond, "wait before close connection")
 }
