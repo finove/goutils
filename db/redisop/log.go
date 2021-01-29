@@ -1,6 +1,7 @@
 package redisop
 
 import (
+	"fmt"
 	"log"
 	"os"
 )
@@ -49,7 +50,7 @@ func NewDefaultLogger(level string) *DefaultLogger {
 // Warning warning message
 func (l DefaultLogger) Warning(format string, v ...interface{}) {
 	if l.Level >= levelWarn {
-		l.l.Printf(format, v...)
+		l.l.Output(3, fmt.Sprintf(format, v...))
 	}
 	return
 }
@@ -57,7 +58,7 @@ func (l DefaultLogger) Warning(format string, v ...interface{}) {
 // Info info message
 func (l DefaultLogger) Info(format string, v ...interface{}) {
 	if l.Level >= levelInfo {
-		l.l.Printf(format, v...)
+		l.l.Output(3, fmt.Sprintf(format, v...))
 	}
 	return
 }
@@ -65,7 +66,7 @@ func (l DefaultLogger) Info(format string, v ...interface{}) {
 // Debug debug message
 func (l DefaultLogger) Debug(format string, v ...interface{}) {
 	if l.Level >= levelDebug {
-		l.l.Printf(format, v...)
+		l.l.Output(3, fmt.Sprintf(format, v...))
 	}
 	return
 }

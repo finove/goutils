@@ -3,9 +3,11 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/finove/goutils/db/redisop"
 	"github.com/finove/goutils/errormessage"
 	"github.com/finove/goutils/logger"
 	"github.com/finove/goutils/vconfig"
+	"github.com/garyburd/redigo/redis"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +15,8 @@ var (
 	tryWhat        string
 	tryCfgFileName string
 )
+
+var tryWhatList = []string{"log", "cfg", "errmsg", "redis"}
 
 var tryCmd = &cobra.Command{
 	Use:   "try",
@@ -26,6 +30,8 @@ var tryCmd = &cobra.Command{
 			testCfg()
 		case "errmsg":
 			testErrorMsg()
+		case "redis":
+			testRedis()
 		default:
 			testLog()
 		}
@@ -47,6 +53,7 @@ func testLog() {
 	logger.Warning("this is warning log %d", 3)
 	logger.Info("this is info log %d", 4)
 	logger.Debug("this is debug log %d", 5)
+	logger.Info("support trywhat %v", tryWhatList)
 }
 
 func testErrorMsg() {
@@ -69,4 +76,16 @@ func testCfg() {
 	vconfig.Viper.SetDefault("cfg1", "value1")
 	logger.Info("get cfg1 = %s", vconfig.Viper.GetString("cfg1"))
 	vconfig.Viper.WriteConfig()
+}
+
+func testRedis() {
+	var r = &redisop.RedisPoolX{}
+	testLog()
+	logger.Info("test redisop")
+	redisop.SetLogger(logger.GetLogger())
+	r.Connect("default1")
+	r.Rdo("SET", "tmpa", "HELLO WORLD")
+	vv, err := redis.String(r.Rdo("GET", "tmpa"))
+	fmt.Printf("err %v, value %v\n", err, vv)
+	fmt.Printf("redis notify config %s\n", r.GetNotifyConfig())
 }

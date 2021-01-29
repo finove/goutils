@@ -7,6 +7,46 @@ import (
 	"github.com/astaxie/beego/logs"
 )
 
+// Logger logger interface use by this lib
+type Logger interface {
+	Warning(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Debug(format string, v ...interface{})
+}
+
+type logObj struct {
+	bl *logs.BeeLogger
+}
+
+func (l *logObj) Critical(format string, v ...interface{}) {
+	l.bl.Critical(format, v...)
+}
+
+func (l *logObj) Error(format string, v ...interface{}) {
+	l.bl.Error(format, v...)
+}
+
+func (l *logObj) Warning(format string, v ...interface{}) {
+	l.bl.Warning(format, v...)
+}
+
+func (l *logObj) Info(format string, v ...interface{}) {
+	l.bl.Info(format, v...)
+}
+
+func (l *logObj) Debug(format string, v ...interface{}) {
+	l.bl.Debug(format, v...)
+}
+
+var lo logObj = logObj{
+	bl: logs.GetBeeLogger(),
+}
+
+// GetLogger get logger interface
+func GetLogger() Logger {
+	return &lo
+}
+
 type logSetupConfig struct {
 	MaxDays  int    `json:"maxdays"`
 	ToSyslog bool   `json:"tosyslog,omitempty"`
