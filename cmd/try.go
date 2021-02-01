@@ -46,7 +46,7 @@ func init() {
 }
 
 func testLog() {
-	logger.Setup(true, "debug", "")
+	logger.Setup(true, "debug", "t.log", `{"tosyslog":true, "appname":"goutils"}`)
 	logger.SetLevel("info")
 	logger.Fatal("this is fatal log %d", 1)
 	logger.Error("this is error log %d", 2)

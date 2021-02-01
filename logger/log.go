@@ -3,8 +3,9 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // Logger logger interface use by this lib
@@ -18,24 +19,46 @@ type logObj struct {
 	bl *logs.BeeLogger
 }
 
+func formatLog(f interface{}, v ...interface{}) string {
+	var msg string
+	switch f.(type) {
+	case string:
+		msg = f.(string)
+		if len(v) == 0 {
+			return msg
+		}
+		if !strings.Contains(msg, "%") {
+			// do not contain format char
+			msg += strings.Repeat(" %v", len(v))
+		}
+	default:
+		msg = fmt.Sprint(f)
+		if len(v) == 0 {
+			return msg
+		}
+		msg += strings.Repeat(" %v", len(v))
+	}
+	return fmt.Sprintf(msg, v...)
+}
+
 func (l *logObj) Critical(format string, v ...interface{}) {
-	l.bl.Critical(format, v...)
+	l.bl.Critical(formatLog(format, v...))
 }
 
 func (l *logObj) Error(format string, v ...interface{}) {
-	l.bl.Error(format, v...)
+	l.bl.Error(formatLog(format, v...))
 }
 
 func (l *logObj) Warning(format string, v ...interface{}) {
-	l.bl.Warning(format, v...)
+	l.bl.Warning(formatLog(format, v...))
 }
 
 func (l *logObj) Info(format string, v ...interface{}) {
-	l.bl.Info(format, v...)
+	l.bl.Info(formatLog(format, v...))
 }
 
 func (l *logObj) Debug(format string, v ...interface{}) {
-	l.bl.Debug(format, v...)
+	l.bl.Debug(formatLog(format, v...))
 }
 
 var lo logObj = logObj{
@@ -65,7 +88,7 @@ func Setup(console bool, level string, logFileName string, jsonConfig ...string)
 		if cfg.MaxDays <= 0 {
 			cfg.MaxDays = 7
 		}
-		beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, cfg.MaxDays, logs.LevelDebug)
+		beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"useopentime":true,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, cfg.MaxDays, logs.LevelDebug)
 		logs.SetLogger("multifile", beegoLogConfig)
 	}
 	if cfg.ToSyslog == true && cfg.AppName != "" {
@@ -116,7 +139,7 @@ func Debug(f interface{}, v ...interface{}) {
 func NewLogFile(logFileName string, maxDays int) (newLog *logs.BeeLogger) {
 	var beegoLogConfig string
 	newLog = logs.NewLogger()
-	beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, maxDays, logs.LevelDebug)
+	beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"useopentime":true,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, maxDays, logs.LevelDebug)
 	newLog.SetLogger("multifile", beegoLogConfig)
 	newLog.DelLogger("console")
 	newLog.EnableFuncCallDepth(false)

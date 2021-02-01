@@ -7,7 +7,7 @@ import (
 	"log/syslog"
 	"time"
 
-	"github.com/astaxie/beego/logs"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // adapter name
@@ -17,6 +17,7 @@ const (
 
 type syslogWriter struct {
 	innerWriter *syslog.Writer
+	formatter   logs.LogFormatter
 	AppName     string `json:"appname"`
 	Level       int    `json:"level"`
 }
@@ -43,7 +44,7 @@ func (c *syslogWriter) Init(jsonConfig string) (err error) {
 }
 
 // WriteMsg write message in syslog.
-func (c *syslogWriter) WriteMsg(when time.Time, msg string, level int) (err error) {
+func (c *syslogWriter) WriteMsg1(when time.Time, msg string, level int) (err error) {
 	if level > c.Level {
 		return nil
 	}
@@ -74,6 +75,24 @@ func (c *syslogWriter) WriteMsg(when time.Time, msg string, level int) (err erro
 		c.innerWriter.Debug(msg)
 	}
 	return nil
+}
+
+func (c *syslogWriter) SetFormatter(f logs.LogFormatter) {
+	c.formatter = f
+	return
+}
+
+func (c *syslogWriter) Format(lm *logs.LogMsg) string {
+	return lm.OldStyleFormat()
+}
+
+// WriteMsg write message in syslog.
+func (c *syslogWriter) WriteMsg(lm *logs.LogMsg) error {
+	if lm.Level > c.Level {
+		return nil
+	}
+	msg := c.Format(lm)
+	return c.WriteMsg1(lm.When, msg, lm.Level)
 }
 
 // Flush implementing method. empty.
