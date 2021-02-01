@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/beego/beego/v2/core/logs"
 )
+
+var moreLogger sync.Map
 
 // Logger logger interface use by this lib
 type Logger interface {
@@ -136,16 +139,73 @@ func Debug(f interface{}, v ...interface{}) {
 }
 
 // NewLogFile init another log file
-func NewLogFile(logFileName string, maxDays int) (newLog *logs.BeeLogger) {
+func NewLogFile(logFileName string, maxDays int, tags ...string) (newLog *logs.BeeLogger) {
 	var beegoLogConfig string
 	newLog = logs.NewLogger()
 	beegoLogConfig = fmt.Sprintf(`{"filename":%q,"maxsize":%d,"useopentime":true,"rotate":true,"maxdays":%d,"level":%d}`, logFileName, 1<<29, maxDays, logs.LevelDebug)
 	newLog.SetLogger("multifile", beegoLogConfig)
 	newLog.DelLogger("console")
 	newLog.EnableFuncCallDepth(false)
-	newLog.SetLogFuncCallDepth(4)
+	newLog.SetLogFuncCallDepth(3)
 	newLog.SetLevel(getLevel("info"))
+	if len(tags) > 0 {
+		moreLogger.Store(tags[0], newLog)
+	}
 	return
+}
+
+func getBeeLog(tag string) (log *logs.BeeLogger) {
+	if value, ok := moreLogger.Load(tag); ok == true {
+		log, ok = value.(*logs.BeeLogger)
+	}
+	return
+}
+
+// EnalbeFuncCallFor enable log call func
+func EnalbeFuncCallFor(tag string, enabled ...bool) {
+	if ll := getBeeLog(tag); ll != nil {
+		var toEnable = true
+		if len(enabled) > 0 {
+			toEnable = enabled[0]
+		}
+		ll.EnableFuncCallDepth(toEnable)
+	}
+}
+
+// EnalbeConsoleFor enable log to console
+func EnalbeConsoleFor(tag string, enabled ...bool) {
+	if ll := getBeeLog(tag); ll != nil {
+		var toEnable = true
+		if len(enabled) > 0 {
+			toEnable = enabled[0]
+		}
+		if toEnable {
+			ll.SetLogger("console")
+		} else {
+			ll.DelLogger("console")
+		}
+	}
+}
+
+// ErrorFor logs a message at error level
+func ErrorFor(tag string, f interface{}, v ...interface{}) {
+	if ll := getBeeLog(tag); ll != nil {
+		ll.Error(formatLog(f, v...))
+	}
+}
+
+// WarningFor logs a message at warning level
+func WarningFor(tag string, f interface{}, v ...interface{}) {
+	if ll := getBeeLog(tag); ll != nil {
+		ll.Warning(formatLog(f, v...))
+	}
+}
+
+// InfoFor logs a message at info level
+func InfoFor(tag string, f interface{}, v ...interface{}) {
+	if ll := getBeeLog(tag); ll != nil {
+		ll.Informational(formatLog(f, v...))
+	}
 }
 
 // getLevel fatal,error,warn,info,debug

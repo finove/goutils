@@ -54,6 +54,10 @@ func testLog() {
 	logger.Info("this is info log %d", 4)
 	logger.Debug("this is debug log %d", 5)
 	logger.Info("support trywhat %v", tryWhatList)
+	logger.NewLogFile("tf.log", 3, "toFile")
+	logger.ErrorFor("toFile", "to file log info %d", 11)
+	logger.WarningFor("toFile", "to file log info %d", 12)
+	logger.InfoFor("toFile", "to file log info %d", 13)
 }
 
 func testErrorMsg() {

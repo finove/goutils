@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const goutilsVersion = "1.1.0"
+const goutilsVersion = "1.1.1"
 
 var (
 	configFile string
